@@ -1,14 +1,16 @@
+import os
 import pypsa
 import pandas as pd
 
 # === Parameter ===
-eur_file = r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050.nc"
-alg_file = r"C:\Users\maiks\pypsa-earth\networks\NoSectorNetwork\elec_s_6_ec_lcopt_Co2L0.00.nc"
+eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/01/networks/base_s_20___2050.nc" #r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050.nc"
+alg_file = r"/home/student_01/Student_Folders/Maik/pypsa-earth/networks/01/elec_s_10_ec_lcopt_1h.nc" #r"C:\Users\maiks\pypsa-earth\networks\NoSectorNetwork\elec_s_6_ec_lcopt_Co2L0.00.nc"
 #output_file = "merged_europe_algeria_2050.nc"
 
 # === Netzwerke laden ===
 n_eur = pypsa.Network(eur_file)
-#n_eur_copy = n_eur
+n_copy = pypsa.Network(eur_file)
+
 n_alg = pypsa.Network(alg_file)
 
 n_alg.component
@@ -49,11 +51,6 @@ for name, row in lines.iterrows():
         print(f"Fehler beim Hinzufügen der Line '{name}': {e}")
 
 
-
-
-
-
-
 n_eur_copy = pypsa.Network(eur_file)
 
 print(n_alg.component)
@@ -87,7 +84,12 @@ n_eur.plot(
 )
 
 
-output_file = r"C:\Users\maiks\pypsa-eur\resources\networks\merged_network_2050.nc"
-n_eur.export_to_netcdf(output_file)
+# Suffix "_old" einfügen
+base, ext = os.path.splitext(eur_file)
+eur_file_old = base + "_pre01" + ext
 
-print(f"Netzwerk erfolgreich gespeichert unter: {output_file}")
+#output_file = r"C:\Users\maiks\pypsa-eur\resources\networks\merged_network_2050.nc"
+n_eur.export_to_netcdf(eur_file)
+n_eur_copy.export_to_netcdf(eur_file_old)
+
+print(f"Netzwerk erfolgreich gespeichert unter: {eur_file}")
