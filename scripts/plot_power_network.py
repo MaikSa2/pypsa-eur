@@ -253,10 +253,16 @@ if __name__ == "__main__":
 
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
 
-    map_opts = snakemake.params.plotting["map"]
+    #map_opts = snakemake.params.plotting["map"]
+    map_opts = {
+    "boundaries": [-18, 30, 10, 71]  # [minx, maxx, miny, maxy]
+    }
+
+
 
     if map_opts["boundaries"] is None:
         map_opts["boundaries"] = regions.total_bounds[[0, 2, 1, 3]] + [-1, 1, -1, 1]
+        #map_opts["boundaries"] = [-15, 35, 20, 60]  # [minx, maxx, miny, maxy]
 
     proj = load_projection(snakemake.params.plotting)
 
