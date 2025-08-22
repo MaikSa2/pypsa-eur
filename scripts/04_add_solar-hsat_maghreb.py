@@ -13,42 +13,43 @@ n_copy = pypsa.Network(eur_file)
 
 import re
 
-# Liste aller DZ-Busse
-#dz_buses = n.buses[n.buses.index.str.startswith("DZ")].index
+# === Nordafrikanische Länder-Kürzel ===
+countries = ["DZ", "MA", "MR", "TN"]
 
-pattern = re.compile(r"^DZ\d \d$")  # z. B. DZ0 0, DZ1 3 usw.
-dz_buses = [bus for bus in n.buses.index if pattern.match(bus)]
+# === Alle passenden Busse extrahieren ===
+pattern = re.compile(r"^(" + "|".join(countries) + r")\d \d$")
+target_buses = [bus for bus in n.buses.index if pattern.match(bus)]
 
-# Bisherige solar-hsat Generatoren
+# === Bereits existierende solar-hsat Generatoren (nach Bus) ===
 existing_hsat_buses = n.generators[n.generators.carrier == "solar-hsat"].bus
 
-# Fehlende Buses ermitteln
-#missing_buses = dz_buses.difference(existing_hsat_buses)
-missing_buses = pd.Index(dz_buses).difference(existing_hsat_buses)
+# === Fehlende Busse für solar-hsat bestimmen ===
+missing_buses = pd.Index(target_buses).difference(existing_hsat_buses)
 
-# Generatoren-Dummy-Daten erstellen
+# === Neue Generatoren erstellen ===
 new_generators = pd.DataFrame({
     "bus": missing_buses,
     "carrier": "solar-hsat",
     "p_nom": 0.0,
     "p_nom_extendable": True,
     "p_nom_min": 0.0,
-    "p_nom_max": 0.0,
+    "p_nom_max": 0.0,  # <- Wird später angepasst, wenn Potenziale bekannt sind
     "build_year": 2020,
     "lifetime": 25
 }, index=[f"{bus} solar-hsat" for bus in missing_buses])
 
-# In Netz einfügen
+# === Neue Generatoren hinzufügen ===
 n.generators = pd.concat([n.generators, new_generators])
 
-print(f"{len(missing_buses)} neue solar-hsat Generatoren hinzugefügt.")
+print(f"{len(missing_buses)} neue solar-hsat Generatoren hinzugefügt für: {', '.join(countries)}")
 
-# Suffix "_old" einfügen
+# === Sicherung des alten Netzwerks ===
 base, ext = os.path.splitext(eur_file)
 eur_file_old = base + "_pre04" + ext
 
-# Netzwerk speichern
+# === Netzwerk speichern ===
 n.export_to_netcdf(eur_file)
 n_copy.export_to_netcdf(eur_file_old)
 
-print(f"Netzwerk erfolgreich gespeichert unter:\n{eur_file}")
+print(f"Modifiziertes Netzwerk gespeichert unter:\n{eur_file}")
+print(f"Backup gespeichert unter:\n{eur_file_old}")

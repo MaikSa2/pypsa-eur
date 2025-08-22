@@ -1324,13 +1324,13 @@ def solve_network(
     n.params = params
     
 
-    print("n.links.loc[[Transmed, Shipping Algeria Germany], reversed] = 0 wird ausgeführt")
-    #n.links.loc[["Transmed", "Shipping Algeria Germany"], "reversed"] = 0.0
-    # Liste der gewünschten Links
-    target_links = ["Transmed", "Shipping Algeria Germany"]
-    n.links.loc[target_links, "reversed"] = n.links.loc[target_links, "reversed"].fillna(False).astype(bool)
-    n.links["reversed"] = n.links["reversed"].astype(bool)
-    print("n.links.loc[[Transmed, Shipping Algeria Germany], reversed] = 0 wurde ausgeführt")
+    #print("n.links.loc[[Transmed, Shipping Algeria Germany], reversed] = 0 wird ausgeführt")
+    ##n.links.loc[["Transmed", "Shipping Algeria Germany"], "reversed"] = 0.0
+    ## Liste der gewünschten Links
+    #target_links = ["Transmed", "Shipping Algeria Germany"]
+    #n.links.loc[target_links, "reversed"] = n.links.loc[target_links, "reversed"].fillna(False).astype(bool)
+    #n.links["reversed"] = n.links["reversed"].astype(bool)
+    #print("n.links.loc[[Transmed, Shipping Algeria Germany], reversed] = 0 wurde ausgeführt")
 
     if rolling_horizon and rule_name == "solve_operations_network":
         kwargs["horizon"] = cf_solving.get("horizon", 365)

@@ -158,8 +158,10 @@ def define_spatial(nodes, options):
 
     spatial.methanol = SimpleNamespace()
 
-    spatial.methanol.nodes = ["EU methanol"]
-    spatial.methanol.locations = ["EU"]
+    #spatial.methanol.nodes = ["EU methanol"]
+    #spatial.methanol.locations = ["EU"]
+    spatial.methanol.nodes = nodes + [" methanol"]
+    spatial.methanol.locations = nodes
 
     if options["methanol"]["regional_methanol_demand"]:
         spatial.methanol.demand_locations = nodes
@@ -173,8 +175,11 @@ def define_spatial(nodes, options):
     # oil
     spatial.oil = SimpleNamespace()
 
-    spatial.oil.nodes = ["EU oil"]
-    spatial.oil.locations = ["EU"]
+    #spatial.oil.nodes = ["EU oil"]
+    #spatial.oil.locations = ["EU"]
+
+    spatial.oil.nodes = nodes + [" oil"]
+    spatial.oil.locations = nodes
 
     if options["regional_oil_demand"]:
         spatial.oil.demand_locations = nodes

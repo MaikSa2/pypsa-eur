@@ -57,7 +57,8 @@ if __name__ == "__main__":
     n.buses.loc["EU", ["x", "y"]] = eu_location["x"], eu_location["y"]
 
     # get balance map plotting parameters
-    boundaries = config["map"]["boundaries"]
+    #boundaries = config["map"]["boundaries"]
+    boundaries = [-20, 30, 10, 71]
     config = config["balance_map"][carrier]
     conversion = config["unit_conversion"]
 
@@ -65,9 +66,16 @@ if __name__ == "__main__":
         raise ValueError(
             f"Carrier {carrier} is not in the network. Remove from configuration `plotting: balance_map: bus_carriers`."
         )
-
+    ###hier geändert für schöneren Plot mit nordafrikanischen Bussen
     # for plotting change bus to location
-    n.buses["location"] = n.buses["location"].replace("", "EU").fillna("EU")
+    #n.buses["location"] = n.buses["location"].replace("", "EU").fillna("EU")
+
+    n.buses["location"] = n.buses["location"].fillna("")  # Damit wir str.split anwenden können
+
+    # Nur für leere Location-Einträge: überschreiben mit Bus-Prefix
+    empty_loc_mask = n.buses["location"] == ""
+    n.buses.loc[empty_loc_mask, "location"] = n.buses.loc[empty_loc_mask].index.to_series().str.rsplit(" ", n=1).str[0]
+
 
     # set location of buses to EU if location is empty and set x and y coordinates to bus location
     n.buses["x"] = n.buses.location.map(n.buses.x)
@@ -155,7 +163,7 @@ if __name__ == "__main__":
         bus_colors=colors,
         bus_split_circles=True,
         line_widths=line_widths * branch_width_factor,
-        link_widths=link_widths * branch_width_factor,
+        link_widths=link_widths * branch_width_factor * 0.01,
         flow=flow * flow_size_factor,
         ax=ax,
         margin=0.2,

@@ -1,13 +1,14 @@
 import pypsa
 import numpy as np
 import pandas as pd
+import os
 
 # Eingabe- und Ausgabedateien
-eur_file = r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050.nc"
-output_file = r"C:\Users\maiks\pypsa-eur\resources\networks\fixed_network_2050_reversed_fixed.nc"
+eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc" 
 
 # Netzwerk laden
 n = pypsa.Network(eur_file)
+n_copy = pypsa.Network(eur_file)
 
 # 'reversed' Spalte prüfen und fehlende Werte ersetzen
 if "reversed" in n.links.columns:
@@ -15,7 +16,12 @@ if "reversed" in n.links.columns:
 else:
     n.links["reversed"] = False
 
-# Netzwerk speichern
-n.export_to_netcdf(output_file)
+# Suffix "_old" einfügen
+base, ext = os.path.splitext(eur_file)
+eur_file_old = base + "_pre03_abermitNH3undpipelineagain" + ext
 
-print(f"Netzwerk erfolgreich gespeichert unter:\n{output_file}")
+# Netzwerke speichern
+n.export_to_netcdf(eur_file)
+n_copy.export_to_netcdf(eur_file_old)
+
+print(f"Netzwerk erfolgreich gespeichert unter:\n{eur_file}")
