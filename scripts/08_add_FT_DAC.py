@@ -16,21 +16,21 @@ n_copy = pypsa.Network(eur_file)
 
 
 #Methanol Busse
-# Ziel-Busse für neue Methanoliliserungs-Links
+# oil-Busse für neue FT-Links
 new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2", "MA0 0 H2", "MA0 1 H2", "MR6 0 H2", "TN0 0 H2"]
 
 for h2_bus in new_h2_buses:
     # Namen für den neuen methanol-Bus generieren
-    meoh_bus = h2_bus.replace("H2", "methanol")
-
+    oil_bus = h2_bus.replace("H2", "oil")
+    electricity_bus = h2_bus.replace(" H2", "")
     # Referenzbusdaten laden
     ref_bus = n.buses.loc[h2_bus]
 
     # Neuen Methanol-Bus hinzufügen
     n.add("Bus",
-          meoh_bus,
-          carrier="methanol",
-          location=ref_bus.location,
+          oil_bus,
+          carrier="oil",
+          #location=ref_bus.location,
           lat=ref_bus.lat,
           lon=ref_bus.lon,
           country=ref_bus.country,
@@ -40,24 +40,26 @@ for h2_bus in new_h2_buses:
           x=ref_bus.x,
           y=ref_bus.y,
           v_nom=1.0,  # üblich für Flüssigkraftstoffträger
-          control="PQ"
+          control="PQ",
+          unit = "MWh_th",
+          location = electricity_bus
     )
 
-### Methanol Stores hinzufügen
+### oil Stores hinzufügen
 # Template-Store-Daten holen
-template_link = n.stores.loc["IT0 0 methanol Store"]
+template_link = n.stores.loc["IT0 0 oil Store"]
 
 for h2_bus in new_h2_buses:
     # Namen für den exisitierenden MEOH Bus generieren
-    meoh_bus = h2_bus.replace("H2", "methanol")
+    oil_store = h2_bus.replace("H2", "oil")
 
     # Falls der Store noch nicht existiert:
-    if meoh_bus not in n.stores.index:
+    if oil_store not in n.stores.index:
         # Store hinzufügen, basierend auf den Template-Werten
         n.add(
             "Store",
-            meoh_bus,
-            bus=meoh_bus,  # muss bereits im Netzwerk existieren!
+            oil_store,
+            bus=oil_store,  # Weil store gleicher Name wie Bus
             carrier=template_link.carrier,
             e_nom=template_link.e_nom,
             e_min_pu=template_link.e_min_pu,
@@ -68,6 +70,7 @@ for h2_bus in new_h2_buses:
             e_nom_extendable = template_link.e_nom_extendable
         )
 
+'''
 ### Heat Busse hinzufügen
 for h2_bus in new_h2_buses:
     # Namen für den neuen methanol-Bus generieren
@@ -93,8 +96,8 @@ for h2_bus in new_h2_buses:
           #control="PQ",
           unit="MWh_th"
     ) 
-
-
+'''
+'''
 ### CO2 Busse hinzufügen
 for h2_bus in new_h2_buses:
     # Namen für den neuen co2-Bus generieren
@@ -140,16 +143,16 @@ for h2_bus in new_h2_buses:
             marginal_cost=template_link.marginal_cost,
             e_nom_extendable = template_link.e_nom_extendable
         )
+'''
 
-
-## Methanolisierungs-Links hinzufügen
+## FT-Links hinzufügen
 # Referenz-Link
-template_link = n.links.loc["IT0 0 methanolisation"]
-candidate_bus1 = n.buses[n.buses.index.str.contains("methanol", case=False)].index
+template_link = n.links.loc["IT0 0 Fischer-Tropsch"]
+candidate_bus1 = n.buses[n.buses.index.str.contains("oil", case=False)].index
 
 for h2_bus in new_h2_buses:
     region_prefix = h2_bus.split()[0][:2]
-    link_name = h2_bus.replace(" H2", " methanolisation")
+    link_name = h2_bus.replace(" H2", " Fischer-Tropsch")
 
     #matching_bus1 = next((b for b in candidate_bus1 if b.startswith(region_prefix)), None)
     #if not matching_bus1:
@@ -159,17 +162,18 @@ for h2_bus in new_h2_buses:
     electricity_bus = h2_bus.replace(" H2", "")
     hydrogen_bus = h2_bus
     #meoh_bus = matching_bus1
-    meoh_bus = h2_bus.replace(" H2", " methanol")
+    oil_bus = h2_bus.replace(" H2", " oil")
     co2_stored_bus = h2_bus.replace(" H2", " co2 stored")
+    heat_bus = h2_bus.replace(" H2", " heat")
 
     # Link-Daten aus Template kopieren und anpassen
     data = template_link.copy()
 
     data["bus0"] = hydrogen_bus      # H2
-    data["bus1"] = meoh_bus              # methanol
-    data["bus2"] = electricity_bus         # H2
+    data["bus1"] = oil_bus              # methanol
+    data["bus2"] = co2_stored_bus         # H2
     # Falls du weitere Busse hinzufügen willst, z.B. bus3, bus4:
-    data["bus3"] = co2_stored_bus #angepasst auf die lokalen co2 stored-Busse
+    data["bus3"] = heat_bus #angepasst auf die lokalen co2 stored-Busse
     data["bus4"] = np.nan
     #data["efficiency4"] = 1.0
 
@@ -177,7 +181,7 @@ for h2_bus in new_h2_buses:
     n.add("Link", name=link_name, **data.to_dict())
 
 
-
+'''
 ## Gas-Boiler Links hinzufügen
 # Referenz-Link
 template_link = n.links.loc["IT0 0 urban central gas boiler"]
@@ -243,15 +247,15 @@ for h2_bus in new_h2_buses:
 
     # Link einzeln hinzufügen
     n.add("Link", name=link_name, **data.to_dict()) #overwrite=True
-
+'''
 ## Shipping Links hinzufügen
 
 #NH3_export_buses = ["DZ0 2 NH3", "DZ0 5 NH3", "MA0 0 NH3", "MA0 1 NH3", "MR6 0 NH3", "TN0 0 NH3"]
 #NH3_import_buses = ["BE0 0 NH3", "DE0 0 NH3", "DK0 0 NH3", "ES0 0 NH3", "FR0 0 NH3", "GB2 0 NH3","IE3 0 NH3", "IT0 0 NH3", "NL0 0 NH3", "NO1 0 NH3", "PT0 0 NH3", "SE1 0 NH3"]
 #reduced_NH3_import_buses = ["BE0 0 NH3", "DE0 0 NH3", "DK0 0 NH3", "ES0 0 NH3", "FR0 0 NH3", "GB2 0 NH3", "IT0 0 NH3", "NL0 0 NH3", "SE1 0 NH3"]
 
-shipping_distances_meoh = {
-    (k[0].replace("NH3", "methanol"), k[1].replace("NH3", "methanol")): v
+shipping_distances_oil = {
+    (k[0].replace("NH3", "oil"), k[1].replace("NH3", "oil")): v
     for k, v in shipping_distances.items()
 }
 
@@ -261,8 +265,8 @@ shipping_distances_meoh = {
 #euro_per_km = 0.0010 #pi mal Daumen dazwischen interpoliert
 
 marginal_costs_by_distance = {
-    (export, import_): get_cost(km, "Methanol") * km if km is not None else None
-    for (export, import_), km in shipping_distances_meoh.items()
+    (export, import_): get_cost(km, "Blue Crude") * km if km is not None else None
+    for (export, import_), km in shipping_distances_oil.items()
 }
 '''
 #Just linear cost assumption
@@ -282,7 +286,7 @@ for (export_bus, import_bus), marginal_cost in marginal_costs_by_distance.items(
         print(f"⚠️ Import-Bus {import_bus} nicht im Netzwerk.")
         continue
 
-    link_name = f"{export_bus} to {import_bus} shipping-meoh"
+    link_name = f"{export_bus} to {import_bus} shipping-oil"
 
     n.add(
         "Link",
@@ -292,7 +296,7 @@ for (export_bus, import_bus), marginal_cost in marginal_costs_by_distance.items(
         #bus2="co2 atmosphere",  # falls gewünscht, sonst weglassen
         #bus3=np.nan,
         #bus4=np.nan,
-        carrier="shipping-meoh",
+        carrier="shipping-oil",
         efficiency=1.0,
         efficiency2=1.0,
         efficiency3=1.0,
@@ -328,7 +332,7 @@ for (export_bus, import_bus), marginal_cost in marginal_costs_by_distance.items(
 
 # Suffix "_old" einfügen
 base, ext = os.path.splitext(eur_file)
-eur_file_old = base + "_pre062_meoh_DAC" + ext
+eur_file_old = base + "_pre08_FT" + ext
 
 print(n.links["efficiency"].apply(type).value_counts())
 n.links["efficiency"] = n.links["efficiency"].astype("float64")
@@ -339,5 +343,5 @@ n.export_to_netcdf(eur_file)
 #Altes Netzwerk speichern
 n_copy.export_to_netcdf(eur_file_old)
 
-print(f"Script 0621_add_MeOH_DAC.py carried out")
-print(f"Netzwerk erfolgreich gespeichert unter:\n{eur_file}")
+print(f"Script 08_FT.py carried out")
+print(f"Netzwerk mit Fischer-Tropsch-Synthese erfolgreich gespeichert unter:\n{eur_file}")

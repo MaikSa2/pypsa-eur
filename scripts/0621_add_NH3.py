@@ -3,10 +3,12 @@ import numpy as np
 import pandas as pd
 import os
 
-from aa_shipping_variables import shipping_distances
+from aa_shipping_variables import shipping_distances, get_cost
 
+
+from aa_run_variables import eur_file
 # Eingabe- und Ausgabedateien
-eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc" 
+#eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc" 
 #output_file_old = r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050_pre05.nc"
 
 # Netzwerke laden
@@ -55,7 +57,7 @@ for h2_bus in new_h2_buses:
         # Store hinzufügen, basierend auf den Template-Werten
         n.add(
             "Store",
-            nh3_bus + "ammonia store",
+            nh3_bus + " ammonia store",
             bus=nh3_bus,  # muss bereits im Netzwerk existieren!
             carrier=template_store.carrier,
             e_nom=template_store.e_nom,
@@ -63,7 +65,9 @@ for h2_bus in new_h2_buses:
             e_max_pu=template_store.e_max_pu,
             e_cyclic=template_store.e_cyclic,
             capital_cost=template_store.capital_cost,
-            marginal_cost=template_store.marginal_cost
+            marginal_cost=template_store.marginal_cost,
+            e_nom_extendable = template_store.e_nom_extendable,
+            lifetime = template_store.lifetime
         )
 
 ## Haber Bosch Links hinzufügen
@@ -75,14 +79,14 @@ for h2_bus in new_h2_buses:
     region_prefix = h2_bus.split()[0][:2]
     link_name = h2_bus.replace(" H2", " Haber-Bosch")
 
-    matching_bus1 = next((b for b in candidate_bus1 if b.startswith(region_prefix)), None)
-    if not matching_bus1:
-        print(f"⚠️ Kein passender NH3-Bus für {h2_bus} gefunden.")
-        continue
+    #matching_bus1 = next((b for b in candidate_bus1 if b.startswith(region_prefix)), None)
+    #if not matching_bus1:
+    #    print(f"⚠️ Kein passender NH3-Bus für {h2_bus} gefunden.")
+    #    continue
 
     electricity_bus = h2_bus.replace(" H2", "")
     hydrogen_bus = h2_bus
-    nh3_bus = matching_bus1
+    nh3_bus = h2_bus.replace(" H2", " NH3")  #matching_bus1
 
     # Link-Daten aus Template kopieren und anpassen
     data = template_link.copy()
@@ -106,11 +110,15 @@ for h2_bus in new_h2_buses:
 #NH3_import_buses = ["BE0 0 NH3", "DE0 0 NH3", "DK0 0 NH3", "ES0 0 NH3", "FR0 0 NH3", "GB2 0 NH3","IE3 0 NH3", "IT0 0 NH3", "NL0 0 NH3", "NO1 0 NH3", "PT0 0 NH3", "SE1 0 NH3"]
 #reduced_NH3_import_buses = ["BE0 0 NH3", "DE0 0 NH3", "DK0 0 NH3", "ES0 0 NH3", "FR0 0 NH3", "GB2 0 NH3", "IT0 0 NH3", "NL0 0 NH3", "SE1 0 NH3"]
 
-
-euro_per_km = 30 / 2400  # 0.0125 €/MWh/km
-
+#euro_per_km = 30 / 2400  # 0.0125 €/MWh/km
+'''
 marginal_costs_by_distance = {
     (export, import_): round(euro_per_km * km, 2)
+    for (export, import_), km in shipping_distances.items()
+}
+'''
+marginal_costs_by_distance = {
+    (export, import_): get_cost(km, "Ammoniak") * km if km is not None else None
     for (export, import_), km in shipping_distances.items()
 }
 
@@ -171,7 +179,7 @@ for (export_bus, import_bus), marginal_cost in marginal_costs_by_distance.items(
 
 # Suffix "_old" einfügen
 base, ext = os.path.splitext(eur_file)
-eur_file_old = base + "_pre062_nh3_store" + ext
+eur_file_old = base + "_pre0621_NH3" + ext
 
 print(n.links["efficiency"].apply(type).value_counts())
 n.links["efficiency"] = n.links["efficiency"].astype("float64")
@@ -182,4 +190,5 @@ n.export_to_netcdf(eur_file)
 #Altes Netzwerk speichern
 n_copy.export_to_netcdf(eur_file_old)
 
+print(f"Script 0621_add_NH3-py carried out")
 print(f"Netzwerk erfolgreich gespeichert unter:\n{eur_file}")

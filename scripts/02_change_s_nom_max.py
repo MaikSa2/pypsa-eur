@@ -2,8 +2,9 @@ import pypsa
 import numpy as np
 import os
 
+from aa_run_variables import eur_file
 # Eingabe- und Ausgabedateien
-eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc"  #r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050.nc"
+#eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc"  #r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050.nc"
 #output_file = r"C:\Users\maiks\pypsa-eur\resources\networks\merged_network_2050_newlines.nc"
 
 # Netzwerk laden

@@ -3,8 +3,10 @@ import numpy as np
 import pandas as pd
 import os
 
+from aa_run_variables import eur_file
+
 # Eingabe- und Ausgabedateien
-eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc" 
+#eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc" 
 
 # Netzwerk laden
 n = pypsa.Network(eur_file)
@@ -18,7 +20,7 @@ else:
 
 # Suffix "_old" einfügen
 base, ext = os.path.splitext(eur_file)
-eur_file_old = base + "_pre03_abermitNH3undpipelineagain" + ext
+eur_file_old = base + "_pre03" + ext
 
 # Netzwerke speichern
 n.export_to_netcdf(eur_file)
