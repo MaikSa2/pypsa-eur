@@ -5,7 +5,7 @@ import pandas as pd
 from aa_run_variables import eur_file
 # === Parameter ===
 #eur_file = r"/home/student_01/Student_Folders/Maik/pypsa-eur/resources/04/networks/base_s_20___2050.nc" #r"C:\Users\maiks\pypsa-eur\resources\networks\base_s_39_Co2L0.00_Co2L0.00_2050.nc"
-alg_file = r"/home/student_01/Student_Folders/Maik/elec_s_16_ec_lcopt_1h.nc" #r"/home/student_01/Student_Folders/Maik/pypsa-earth/networks/01/elec_s_10_ec_lcopt_1h.nc" #r"C:\Users\maiks\pypsa-earth\networks\NoSectorNetwork\elec_s_6_ec_lcopt_Co2L0.00.nc"
+alg_file = r"/home/student_01/Student_Folders/Maik/elec_s_16_ec_lcopt_3h_manual.nc" #r"/home/student_01/Student_Folders/Maik/pypsa-earth/networks/01/elec_s_10_ec_lcopt_1h.nc" #r"C:\Users\maiks\pypsa-earth\networks\NoSectorNetwork\elec_s_6_ec_lcopt_Co2L0.00.nc"
 #output_file = "merged_europe_algeria_2050.nc"
 
 # === Netzwerke laden ===
@@ -51,6 +51,49 @@ for name, row in lines.iterrows():
     except Exception as e:
         print(f"Fehler beim Hinzufügen der Line '{name}': {e}")
 
+for attr in dir(n_alg):
+    if not attr.endswith("_t") or not hasattr(n_eur, attr):
+        continue
+
+    ts_src = getattr(n_alg, attr)
+    ts_dst = getattr(n_eur, attr)
+
+    base_comp = attr[:-2]  # "generators_t" -> "generators"
+    if not hasattr(n_eur, base_comp):
+        continue
+    existing_assets = getattr(n_eur, base_comp).index
+
+    for key in dir(ts_src):
+        if key.startswith("_"):
+            continue
+        val = getattr(ts_src, key)
+        if not isinstance(val, pd.DataFrame):
+            continue
+
+        # nur Assets, die im Ziel existieren
+        cols = [c for c in val.columns if c in existing_assets]
+        if not cols:
+            continue
+
+        new_df = val.reindex(index=n_eur.snapshots, columns=cols)
+
+        # --- Update-in-Place statt Ersetzen ---
+        old_df = getattr(ts_dst, key, None)
+        if isinstance(old_df, pd.DataFrame):
+            # Index vereinheitlichen
+            old_df = old_df.reindex(index=n_eur.snapshots)
+
+            # Spaltenvereinigung (alles Alte behalten)
+            all_cols = old_df.columns.union(new_df.columns)
+            old_df = old_df.reindex(columns=all_cols)
+
+            # Werte aus Quelle aufschreiben (nur überlappende Zellen)
+            old_df.loc[new_df.index, new_df.columns] = new_df
+
+            setattr(ts_dst, key, old_df)
+        else:
+            # gab es noch nicht → neu anlegen
+            setattr(ts_dst, key, new_df)
 
 n_eur_copy = pypsa.Network(eur_file)
 
