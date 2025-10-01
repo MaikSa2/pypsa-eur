@@ -55,8 +55,8 @@ def load_projection(plotting_params):
 @retry
 def plot_map(
     n,
-    components=["links", "stores", "storage_units", "generators"],
-    bus_size_factor=2e10,
+    components=["links", "stores", "storage_units", "generators", "loads"],
+    bus_size_factor=2e4,#2e10,
     transmission=False,
     with_legend=True,
 ):
@@ -75,18 +75,19 @@ def plot_map(
             continue
 
         df_c["nice_group"] = df_c.carrier.map(rename_techs_tyndp)
+        df_c = df_c[~df_c.carrier.str.contains("HVC")]
 
+        #df_c.loc[df_c["bus"].str.contains("DZ", na=False), "location"] = "DZ0 0"    #Mapping der DZ Busse zu DZ0 0, um diese auch im Plot zu sehen
         for col in ["bus", "bus0", "bus1", "bus2"]:
             if col in df_c.columns:
                 df_c.loc[df_c[col].str.contains("DZ", na=False), "location"] = "DZ0 0"
-                df_c.loc[df_c[col].str.contains("MA", na=False), "location"] = "MA0 0"
-                df_c.loc[df_c[col].str.contains("MR", na=False), "location"] = "MR0 0"
-                df_c.loc[df_c[col].str.contains("TN", na=False), "location"] = "TN0 0"
 
-        attr = "e_nom_opt" if comp == "stores" else "p_nom_opt"
+        attr = "p_set" #if comp == "loads" 
+        #attr = "e_nom_opt" if comp == "stores" else "p_nom_opt"  #attr = "e_nom_opt" if comp == "stores" else "p_nom_opt"
+        print(comp)
 
         costs_c = (
-            (df_c.capital_cost * df_c[attr])
+            (df_c[attr])      #df_c.capital_cost * 
             .groupby([df_c.location, df_c.nice_group])
             .sum()
             .unstack()
@@ -112,7 +113,7 @@ def plot_map(
     costs = costs.stack()  # .sort_index()
 
     # hack because impossible to drop buses...
-    eu_location = snakemake.params.plotting.get("eu_node_location", dict(x=-5.5, y=46))
+    eu_location = snakemake.params.plotting.get("eu_node_location", dict(x=150, y=-30)) #(x=-5.5, y=46))
     n.buses.loc["EU gas", "x"] = eu_location["x"]
     n.buses.loc["EU gas", "y"] = eu_location["y"]
 
@@ -130,7 +131,7 @@ def plot_map(
     # make sure they are removed from index
     costs.index = pd.MultiIndex.from_tuples(costs.index.values)
 
-    threshold = 100e6  # 100 mEUR/a
+    threshold = 5000#100000 #100e6  # 100 mEUR/a
     carriers = costs.groupby(level=1).sum()
     carriers = carriers.where(carriers > threshold).dropna()
     carriers = list(carriers.index)
@@ -170,7 +171,25 @@ def plot_map(
 
     fig, ax = plt.subplots(subplot_kw={"projection": proj})
     fig.set_size_inches(7, 6)
-
+    
+    #costs.loc["EU gas"] = 0
+    #eu_mask = costs.index.get_level_values(0).str.contains("EU")
+    #costs.loc[eu_mask] = 0.0
+    print(costs.sort_values(ascending=False).head(50))
+    #mask_oil_ref = costs.index.get_level_values(1).str.contains(r"oil refining", case=False, na=False)
+    #costs = costs[~mask_oil_ref]
+    #mask_oil = costs.index.get_level_values(1).str.contains(r"oil", case=False, na=False)
+    #costs = costs[~mask_oil]
+    #mask_co2_seq = costs.index.get_level_values(1).str.contains(r"co2 sequestered", case=False, na=False)
+    #costs = costs[~mask_co2_seq]
+    #mask_meth = costs.index.get_level_values(1).str.contains(r"methanol", case=False, na=False)
+    #costs = costs[~mask_meth]
+    #mask_h2store = costs.index.get_level_values(1).str.contains(r"H2 Store", case=False, na=False)
+    #costs = costs[~mask_h2store]
+    #mask_ammonia = costs.index.get_level_values(1).str.contains(r"ammonia", case=False, na=False)
+    #costs = costs[~mask_ammonia]
+    #print(costs.sort_values(ascending=False).head(10))
+    #print(costs)
     n.plot(
         bus_sizes=costs / bus_size_factor,
         bus_colors=tech_colors,
@@ -195,14 +214,14 @@ def plot_map(
         title="system cost",
     )
 
-    add_legend_circles(
-        ax,
-        sizes,
-        labels,
-        srid=n.srid,
-        patch_kw=dict(facecolor="lightgrey"),
-        legend_kw=legend_kw,
-    )
+    #add_legend_circles(
+    #    ax,
+    #    sizes,
+    #    labels,
+    #    srid=n.srid,
+    #    patch_kw=dict(facecolor="lightgrey"),
+    #    legend_kw=legend_kw,
+    #)
 
     sizes = [10, 5]
     labels = [f"{s} GW" for s in sizes]
@@ -265,8 +284,11 @@ if __name__ == "__main__":
     "boundaries": [-18, 30, 10, 71]  # [minx, maxx, miny, maxy]
     }
 
+
+
     if map_opts["boundaries"] is None:
         map_opts["boundaries"] = regions.total_bounds[[0, 2, 1, 3]] + [-1, 1, -1, 1]
+        #map_opts["boundaries"] = [-15, 35, 20, 60]  # [minx, maxx, miny, maxy]
 
     proj = load_projection(snakemake.params.plotting)
 

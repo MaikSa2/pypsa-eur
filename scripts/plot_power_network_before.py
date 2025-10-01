@@ -75,15 +75,13 @@ def plot_map(
             continue
 
         df_c["nice_group"] = df_c.carrier.map(rename_techs_tyndp)
-
+        #df_c.loc[df_c["bus"].str.contains("DZ", na=False), "location"] = "DZ0 0"    #Mapping der DZ Busse zu DZ0 0, um diese auch im Plot zu sehen
         for col in ["bus", "bus0", "bus1", "bus2"]:
             if col in df_c.columns:
                 df_c.loc[df_c[col].str.contains("DZ", na=False), "location"] = "DZ0 0"
-                df_c.loc[df_c[col].str.contains("MA", na=False), "location"] = "MA0 0"
-                df_c.loc[df_c[col].str.contains("MR", na=False), "location"] = "MR0 0"
-                df_c.loc[df_c[col].str.contains("TN", na=False), "location"] = "TN0 0"
 
-        attr = "e_nom_opt" if comp == "stores" else "p_nom_opt"
+
+        attr = "e_nom" if comp == "stores" else "p_nom"   #attr = "e_nom_opt" if comp == "stores" else "p_nom_opt"
 
         costs_c = (
             (df_c.capital_cost * df_c[attr])
@@ -265,8 +263,11 @@ if __name__ == "__main__":
     "boundaries": [-18, 30, 10, 71]  # [minx, maxx, miny, maxy]
     }
 
+
+
     if map_opts["boundaries"] is None:
         map_opts["boundaries"] = regions.total_bounds[[0, 2, 1, 3]] + [-1, 1, -1, 1]
+        #map_opts["boundaries"] = [-15, 35, 20, 60]  # [minx, maxx, miny, maxy]
 
     proj = load_projection(snakemake.params.plotting)
 

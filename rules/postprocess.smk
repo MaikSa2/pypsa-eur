@@ -50,6 +50,33 @@ if config["foresight"] != "perfect":
         script:
             "../scripts/plot_power_network.py"
 
+    rule plot_power_network_loads:
+        params:
+            plotting=config_provider("plotting"),
+            transmission_limit=config_provider("electricity", "transmission_limit"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            map=RESULTS
+            + "maps/base_s_{clusters}_{opts}_{sector_opts}-loads_{planning_horizons}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_power_network_loads/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_power_network_loads/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_power_network_loads.py"
+
     rule plot_hydrogen_network:
         params:
             plotting=config_provider("plotting"),
@@ -76,6 +103,88 @@ if config["foresight"] != "perfect":
             "../envs/environment.yaml"
         script:
             "../scripts/plot_hydrogen_network.py"
+
+    rule plot_ammonia_network:
+        params:
+            plotting=config_provider("plotting"),
+            foresight=config_provider("foresight"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+        output:
+            map=RESULTS
+            + "maps/base_s_{clusters}_{opts}_{sector_opts}-nh3_network_{planning_horizons}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_ammonia_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_ammonia_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_ammonia_network_red.py"
+
+    rule plot_methanol_network:
+        params:
+            plotting=config_provider("plotting"),
+            foresight=config_provider("foresight"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+        output:
+            map=RESULTS
+            + "maps/base_s_{clusters}_{opts}_{sector_opts}-meoh_network_{planning_horizons}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_ammonia_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_ammonia_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_methanol_network_red.py"
+
+    rule plot_shippinglh2_network:
+        params:
+            plotting=config_provider("plotting"),
+            foresight=config_provider("foresight"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+        output:
+            map=RESULTS
+            + "maps/base_s_{clusters}_{opts}_{sector_opts}-shippinglh2_network_{planning_horizons}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_ammonia_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_ammonia_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_hydrogen_shipping_network_red.py"
+
 
     rule plot_gas_network:
         params:
@@ -109,7 +218,8 @@ if config["foresight"] != "perfect":
         input:
             network=RESULTS
             + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
-            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
         output:
             RESULTS
             + "maps/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_{carrier}.pdf",
