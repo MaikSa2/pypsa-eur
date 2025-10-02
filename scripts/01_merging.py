@@ -95,6 +95,19 @@ for attr in dir(n_alg):
             # gab es noch nicht → neu anlegen
             setattr(ts_dst, key, new_df)
 
+n_eur.lines.loc[["DZ_1", "DZ_9"], "s_nom_extendable"] = False
+
+links_to_remove = [
+    "H2 pipeline DZ0 0-MA0 2",
+    "H2 pipeline DZ0 0-MA0 2-reversed",
+    "H2 pipeline DZ0 5-MA0 2",
+    "H2 pipeline DZ0 5-MA0 2-reversed"
+]
+
+for link in links_to_remove:
+    if link in n_eur.links.index:
+        n_eur.remove("Link", link)
+
 n_eur_copy = pypsa.Network(eur_file)
 
 print(n_alg.component)
