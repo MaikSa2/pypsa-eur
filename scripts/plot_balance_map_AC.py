@@ -54,9 +54,18 @@ if __name__ == "__main__":
     set_scenario_config(snakemake)
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
 
+
     n = pypsa.Network(snakemake.input.network)
+    #n = pypsa.Network(r"/home/student_01/Student_Folders/Maik/pypsa-eur/results/a4_base_shipping_ME_SH2_MG/networks/base_s_20__3h_2050.nc")
     sanitize_carriers(n, snakemake.config)
     n.statistics.set_parameters(round=3, drop_zero=True, nice_names=False)
+    with pd.option_context(
+            "display.max_rows", None,
+            "display.max_columns", None,
+            "display.width", None,
+            "display.max_colwidth", None
+            ):
+                print("n.buses:", n.buses["x"][-80:])
 
     #regions = gpd.read_file(snakemake.input.regions).set_index("name")
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
@@ -91,10 +100,9 @@ if __name__ == "__main__":
     empty_loc_mask = n.buses["location"] == ""
     n.buses.loc[empty_loc_mask, "location"] = n.buses.loc[empty_loc_mask].index.to_series().str.rsplit(" ", n=1).str[0]
 
-
     # set location of buses to EU if location is empty and set x and y coordinates to bus location
-    n.buses["x"] = n.buses.location.map(n.buses.x)
-    n.buses["y"] = n.buses.location.map(n.buses.y)
+    #n.buses["x"] = n.buses.location.map(n.buses.x)
+    #n.buses["y"] = n.buses.location.map(n.buses.y)
 
     # bus_sizes according to energy balance of bus carrier
     eb = n.statistics.energy_balance(bus_carrier=carrier, groupby=["bus", "carrier"])
@@ -275,7 +283,7 @@ if __name__ == "__main__":
 
     # Vorher projizieren:
    #proj_paths = project_paths(ax, paths)
-
+    """
     with pd.option_context(
     "display.max_rows", None,
     "display.max_columns", None,
@@ -284,7 +292,9 @@ if __name__ == "__main__":
     ):
        print("bus_sizes:", bus_sizes)
        #print("bus_colors:", colors)
+    """
 
+    print("len(bus_sizes)", len(bus_sizes))
 
     n.plot(
         bus_sizes=bus_sizes * bus_size_factor,
