@@ -113,8 +113,8 @@ def plot_h2_map(n, regions):
    #test_paths = {
    #"MR6 0 NH3 to DE0 0 NH3 shipping-nh3": [
     #   (-15.98, 18.08),   # Nouakchott
-     #  (-9.14, 38.72),    # Lissabon
-      # (8.11, 53.52),     # Wilhelmshaven
+    #   (-9.14, 38.72),    # Lissabon
+    #   (8.11, 53.52),     # Wilhelmshaven
    #]
    #}
 
@@ -131,7 +131,7 @@ def plot_h2_map(n, regions):
         link_widths=link_widths_total,
         branch_components=["Link"],
         ax=ax,
-       #paths=proj_paths,
+   #    paths=proj_paths,
         **map_opts,
     )
 

@@ -110,7 +110,7 @@ def calculate_costs(n: pypsa.Network) -> pd.Series:
     """
     costs = pd.concat(
         {
-            "capital": n.statistics.capex(),
+            #"capital": n.statistics.expanded_capex(),
             "marginal": n.statistics.opex(),
         }
     )

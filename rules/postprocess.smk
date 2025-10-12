@@ -240,6 +240,141 @@ if config["foresight"] != "perfect":
             "../scripts/plot_balance_map.py"
 
 
+    rule plot_customh2_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customh2.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customh2.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customh2"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_hydrogen.py"
+
+    rule plot_customnh3_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customnh3.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customnh3.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customnh3"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_ammonia.py"
+
+    rule plot_customco2_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customco2.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customco2.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customco2"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_co2.py"
+
+    rule plot_customheat_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customheat.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customheat.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_customheat"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_heat.py"
+
+    rule plot_custom_AC_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_custom_AC.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_custom_AC.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_custom_AC"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_AC.py"
+
 if config["foresight"] == "perfect":
 
     def output_map_year(w):

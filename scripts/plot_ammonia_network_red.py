@@ -109,20 +109,41 @@ def plot_h2_map(n, regions):
     bus_colors = {"Haber-Bosch": "#ff29d9", "ammonia cracker": "#805394"}
    #print(link_widths_total)
    #print(n.links)
-    
-   #test_paths = {
-   #"MR6 0 NH3 to DE0 0 NH3 shipping-nh3": [
-    #   (-15.98, 18.08),   # Nouakchott
-     #  (-9.14, 38.72),    # Lissabon
-      # (8.11, 53.52),     # Wilhelmshaven
-   #]
-   #}
+    '''
+    test_paths = {
+    "MR6 0 NH3 to DE0 0 NH3 shipping-nh3": [
+       (-15.98, 18.08),   # Nouakchott
+       (-9.14, 38.72),    # Lissabon
+       (8.11, 53.52),     # Wilhelmshaven
+    ]
+    }
+    '''
 
-   #fig, ax = plt.subplots(subplot_kw={"projection": ccrs.EqualEarth()})
+    test_paths = {
+    "MR6 0 NH3 to DE0 0 NH3 shipping-nh3": [
+        (-15.98, 18.08),  # Nouakchott
+        (-17.5, 21.0),    # off Western Sahara
+        (-15.0, 27.0),    # offshore WS/Canaries route
+        (-11.5, 31.5),    # off Morocco
+        (-10.0, 36.5),    # approach Iberia SW
+        (-9.3, 38.7),     # off Lisbon
+        (-9.5, 42.8),     # Cape Finisterre
+        (-6.0, 46.5),     # Bay of Biscay
+        (-4.8, 48.5),     # off Brittany (Ushant)
+        (-2.0, 50.0),     # English Channel
+        (1.5, 51.0),      # Strait of Dover
+        (3.5, 52.5),      # Dutch coast
+        (6.5, 53.7),      # German Bight
+        (8.11, 53.52),    # Wilhelmshaven
+    ]
+    }
+
+
+    fig, ax = plt.subplots(subplot_kw={"projection": ccrs.EqualEarth()})
 
     # Vorher projizieren:
-   #proj_paths = project_paths(ax, test_paths)
-        
+    proj_paths = project_paths(ax, test_paths)
+    print("proj_paths:",proj_paths)
     n.plot(
         geomap=True,
         bus_sizes=bus_sizes,
@@ -131,7 +152,7 @@ def plot_h2_map(n, regions):
         link_widths=link_widths_total,
         branch_components=["Link"],
         ax=ax,
-       #paths=proj_paths,
+        paths=proj_paths,
         **map_opts,
     )
 

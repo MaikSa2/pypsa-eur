@@ -8,10 +8,13 @@ Create energy balance maps for the defined carriers.
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+import cartopy.crs as ccrs
 import pypsa
 from packaging.version import Version, parse
 from pypsa.plot import add_legend_lines, add_legend_patches, add_legend_semicircles
 from pypsa.statistics import get_transmission_carriers
+   #from aa_shipping_routes_plot import paths
 
 from scripts._helpers import (
     configure_logging,
@@ -22,7 +25,18 @@ from scripts.add_electricity import sanitize_carriers
 from scripts.plot_power_network import load_projection
 
 SEMICIRCLE_CORRECTION_FACTOR = 2 if parse(pypsa.__version__) <= Version("0.33.2") else 1
-
+'''
+def project_paths(ax, paths_lonlat):
+    """
+    Wandelt ein dict von lon/lat-Pfaden in projizierte x/y-Pfade um.
+    """
+    paths_xy = {}
+    for name, pts in paths_lonlat.items():
+        arr = np.asarray(pts, float)
+        xy = ax.projection.transform_points(ccrs.PlateCarree(), arr[:,0], arr[:,1])
+        paths_xy[name] = [(float(x), float(y)) for x, y in xy[:, :2]]
+    return paths_xy
+'''
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from scripts._helpers import mock_snakemake
@@ -47,8 +61,8 @@ if __name__ == "__main__":
     #regions = gpd.read_file(snakemake.input.regions).set_index("name")
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
     config = snakemake.params.plotting
-    carrier = snakemake.wildcards.carrier
-    print("CARRIER:", carrier)
+    carrier = "AC"           #snakemake.wildcards.carrier
+    print("carrier:", carrier)
     # fill empty colors or "" with light grey
     mask = n.carriers.color.isna() | n.carriers.color.eq("")
     n.carriers["color"] = n.carriers.color.mask(mask, "lightgrey")
@@ -59,7 +73,7 @@ if __name__ == "__main__":
 
     # get balance map plotting parameters
     #boundaries = config["map"]["boundaries"]
-    boundaries = [-20, 30, 10, 71]
+    boundaries = [-30, 18, 10, 71]
     config = config["balance_map"][carrier]
     conversion = config["unit_conversion"]
 
@@ -91,15 +105,16 @@ if __name__ == "__main__":
     )
     components = transmission_carriers.unique("component")
     carriers = transmission_carriers.unique("carrier")
-    
+    print("carriers:", carriers)
     # only carriers that are also in the energy balance
     carriers_in_eb = carriers[carriers.isin(eb.index.get_level_values("carrier"))]
-    print("carriers_in_eb   :", carriers_in_eb)
+    print("carriers_in_eb:", carriers_in_eb)
     eb.loc[components] = eb.loc[components].drop(index=carriers_in_eb, level="carrier")
     eb = eb.dropna()
     print("eb nach droppen:", eb)
     bus_sizes = eb.groupby(level=["bus", "carrier"]).sum().div(conversion)
     bus_sizes = bus_sizes.sort_values(ascending=False)
+    print("bus_sizes:", bus_sizes)
 
     colors = (
         bus_sizes.index.get_level_values("carrier")
@@ -132,16 +147,30 @@ if __name__ == "__main__":
     pd.reset_option("display.max_columns")
     pd.reset_option("display.width")
 
-
     # if there are not lines or links for the bus carrier, use fallback for plotting
     fallback = pd.Series()
     line_widths = flow.get("Line", fallback).abs()
     link_widths = flow.get("Link", fallback).abs()
+    #link_widths[n.links.p_nom_opt < 100 ] = 0.0
+    print("link_widths:", link_widths)
+    print("line_widths:", line_widths)
 
     # define maximal size of buses and branch width
     bus_size_factor = config["bus_factor"]
     branch_width_factor = config["branch_factor"]
     flow_size_factor = config["flow_factor"]
+
+   #loc = n.buses["location"].astype(str).str.replace(r"[\u00A0\u2007\u202F]", " ", regex=True)
+   #mask_empty = loc.str.strip().eq("") | loc.isna()
+   #mask_short = loc.str.match(r"^[A-Z]{2}\d+$", na=False)   # z.B. 'DZ5', 'MA0', 'TN3'
+
+   #mask = mask_empty | mask_short
+   #n.buses.loc[mask, "location"] = n.buses.index.astype(str).str[:5]
+    mask = n.buses["location"].astype(str).str.match(r"^[A-Z]{2}\d$", na=False)
+   #mask = n.buses["location"].isna() | (n.buses["location"].astype(str).str.strip() == "")
+    n.buses["location"] = n.buses["location"].where(~mask, n.buses.index.astype(str).str[:5])
+    print("n.buses['location'] for DZ5 0:", n.buses.loc["DZ5 0", "location"])
+   #print("n.buses['location']:",n.buses["location"])
 
     # get prices per region as colormap
     buses = n.buses.query("carrier in @carrier").index
@@ -149,6 +178,30 @@ if __name__ == "__main__":
     prices = weights @ n.buses_t.marginal_price[buses] / weights.sum()
     price = prices.rename(n.buses.location).groupby(level="Bus").mean()
 
+   #clean_node = n.buses["location"].str.replace(
+   #r"(?i)\s+urban\s+central\b.*$",  # case-insensitiv, am Ende abschneiden
+   #"",
+   #regex=True,
+   #)
+   #clean_node = n.buses["location"].str.replace(r"\s+co2.*$", "", regex=True)
+
+# Optional: analog für andere Carrier, falls sie auch im location hängen:
+# clean_node = (n.buses["location"]
+#               .str.replace(r"\s+co2.*$", "", regex=True)
+#               .str.replace(r"\s+H2.*$", "", regex=True)
+#               # weitere falls nötig…
+#              )
+
+   #price = prices.rename(clean_node).groupby(level="Bus").mean()
+    """
+    with pd.option_context(
+    "display.max_rows", None,
+    "display.max_columns", None,
+    "display.width", None,
+    "display.max_colwidth", None
+    ):
+        print("price:", price)
+    """
     if carrier == "co2 stored" and "CO2Limit" in n.global_constraints.index:
         co2_price = n.global_constraints.loc["CO2Limit", "mu"]
         price = price - co2_price
@@ -174,15 +227,75 @@ if __name__ == "__main__":
         subplot_kw={"projection": crs},
         layout="constrained",
     )
+   #colors = [bus_colors[c] for c in carriers] + [color_h2_pipe]
+
+    # Default-Farbe
+    plot_links = flow.droplevel(0).index 
+    link_colors = pd.Series("#b3f3f4", index=plot_links)
+
+    mask = plot_links.str.contains("shipping", na=False)
+    link_colors.loc[mask] = "#1f77b4"
+
+   #link_colors_clean = link_colors[~link_colors.index.isna()]
+   #link_colors_clean = link_colors_clean.dropna()
+
+   #pd.set_option("display.max_rows", None)
+   #pd.set_option("display.max_columns", None)
+   #pd.set_option("display.width", None)
+
+    print("link_colors:", link_colors)
+
+   #pd.reset_option("display.max_rows")
+   #pd.reset_option("display.max_columns")
+   #pd.reset_option("display.width")
+    # Maske für shipping, fehlende Carrier zählen als False
+   #mask_shipping = n.links["carrier"].astype("string").str.contains("shipping", na=False)
+
+    # Farbe für shipping setzen
+   #link_colors.loc[mask_shipping] = "#1f77b4"
+
+    '''
+    links = n.links.index  
+
+    # Bedingte Farbzuweisung
+    link_colors = np.where(
+    n.links.carrier.str.contains("shipping"),  # Bedingung
+    "#1f77b4",  # Farbe für shipping
+    "#b3f3f4"   # Farbe für pipeline (oder Default)
+)
+
+    # In eine Series packen, mit dem Index der Links
+    link_colors = pd.Series(link_colors, index=links)
+    '''
+   #color_h2_pipe = "#b3f3f4"
+   #link_colors = "#b3f3f4"
+
+
+    fig, ax = plt.subplots(subplot_kw={"projection": ccrs.EqualEarth()})
+
+    # Vorher projizieren:
+   #proj_paths = project_paths(ax, paths)
+
+    with pd.option_context(
+    "display.max_rows", None,
+    "display.max_columns", None,
+    "display.width", None,
+    "display.max_colwidth", None
+    ):
+       print("bus_sizes:", bus_sizes)
+       #print("bus_colors:", colors)
+
 
     n.plot(
         bus_sizes=bus_sizes * bus_size_factor,
         bus_colors=colors,
+       #link_colors = link_colors,
         bus_split_circles=True,
         line_widths=line_widths * branch_width_factor,
         link_widths=link_widths * branch_width_factor * 0.01 ,
         flow=flow * flow_size_factor,
         ax=ax,
+       #paths=proj_paths,
         margin=0.2,
         color_geomap={"border": "darkgrey", "coastline": "darkgrey"},
         geomap=True,
