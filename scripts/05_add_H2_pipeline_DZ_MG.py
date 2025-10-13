@@ -16,14 +16,14 @@ n_copy = pypsa.Network(eur_file)
 #Platzhalter für den relevanten Code
 #H2 Pipeline
 n.add("Link",
-          "H2 pipeline DZ0 1 -> IT0 0",
-          bus0="TN0 0 H2",
-          bus1="IT0 0 H2",
+          "H2 pipeline DZ0 5 -> ES0 0",
+          bus0="DZ0 5 H2",
+          bus1="ES0 0 H2",
           carrier="H2 pipeline",
           efficiency=1.0,
-          length=1443.403468068955, #berechnet mit costs.ipynb
+          length=720.09, #berechnet mit costs.ipynb
           reversed = False, #0.0, evtl. kann ich so vermeiden dass beim SOlven dieser Fehler auftritt, mit "bool" und "float"
-          capital_cost = 49231.76026618799, #berechnet mit costs.ipynb
+          capital_cost = 26466.85375798757,  #berechnet mit costs.ipynb
           #capital_cost=costs.at["H2 (g) pipeline", "capital_cost"],
           p_nom_extendable=True,
           lifetime=50,
@@ -32,7 +32,7 @@ n.add("Link",
 
 # Suffix "_old" einfügen
 base, ext = os.path.splitext(eur_file)
-eur_file_old = base + "_pre05_DZ" + ext
+eur_file_old = base + "_pre05_DZ_MG" + ext
 
 # Neues Netzwerk speichern
 n.export_to_netcdf(eur_file)

@@ -32,7 +32,7 @@ n.add("Link",
 
 # Suffix "_old" einfügen
 base, ext = os.path.splitext(eur_file)
-eur_file_old = base + "_pre05" + ext
+eur_file_old = base + "_pre05_MA" + ext
 
 # Neues Netzwerk speichern
 n.export_to_netcdf(eur_file)
