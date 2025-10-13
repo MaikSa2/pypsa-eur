@@ -71,7 +71,7 @@ for h2_bus in new_h2_buses:
 ### Heat Busse hinzufügen
 for h2_bus in new_h2_buses:
     # Namen für den neuen methanol-Bus generieren
-    heat_bus = h2_bus.replace("H2", "heat")
+    heat_bus = h2_bus.replace("H2", "urban central heat")
 
     # Referenzbusdaten laden
     ref_bus = n.buses.loc[h2_bus]
@@ -79,7 +79,7 @@ for h2_bus in new_h2_buses:
     # Neuen Heat-Bus hinzufügen
     n.add("Bus",
           heat_bus,
-          carrier="heat",
+          carrier="urban central heat",
           location=ref_bus.location,     #wird hier schon beim H2 Bus nicht richtig eingefügt. Könnte evtl. für Plots später wichtig werden
           lat=ref_bus.lat,
           lon=ref_bus.lon,
@@ -181,7 +181,7 @@ for h2_bus in new_h2_buses:
 ## Gas-Boiler Links hinzufügen
 # Referenz-Link
 template_link = n.links.loc["IT0 0 urban central gas boiler"]
-candidate_bus1 = n.buses[n.buses.index.str.contains("heat", case=False)].index
+candidate_bus1 = n.buses[n.buses.index.str.contains("urban central heat", case=False)].index
 
 for h2_bus in new_h2_buses:
     region_prefix = h2_bus.split()[0][:2]
@@ -192,7 +192,7 @@ for h2_bus in new_h2_buses:
         #print(f"⚠️ Kein passender Heat-Bus für {h2_bus} gefunden.")
         #continue
 
-    heat_bus = h2_bus.replace(" H2", " heat")
+    heat_bus = h2_bus.replace(" H2", " urban central heat")
     #electricity_bus = h2_bus.replace(" H2", "")
     #hydrogen_bus = h2_bus
     #meoh_bus = matching_bus1
@@ -225,7 +225,7 @@ for h2_bus in new_h2_buses:
         #print(f"⚠️ Kein passender co2-Bus für {h2_bus} gefunden.")
         #continue
 
-    heat_bus = h2_bus.replace(" H2", " heat")
+    heat_bus = h2_bus.replace(" H2", " urban central heat")
     co2_stored_bus = h2_bus.replace(" H2", " co2 stored")
     electricity_bus = h2_bus.replace(" H2", "")
     #hydrogen_bus = h2_bus
