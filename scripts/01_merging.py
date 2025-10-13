@@ -1,6 +1,7 @@
 import os
 import pypsa
 import pandas as pd
+import math
 
 from aa_run_variables import eur_file
 # === Parameter ===
@@ -139,6 +140,88 @@ n_eur.plot(
     line_widths=line_widths,
     link_widths=link_widths
 )
+
+def haversine_o(lon1, lat1, lon2, lat2):
+    """
+    Berechnet die Distanz (in km) zwischen zwei Punkten
+    auf der Erde mit der Haversine-Formel.
+    """
+    R = 6371.0  # Erdradius in km
+
+    # Umwandlung in Radiant
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+
+    a = math.sin(dphi / 2.0) ** 2 + \
+        math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return R * c
+
+def distances_for_pairs(pairs, points, factor=1.0):
+    """pairs: [(bus0,bus1), ...], points: {bus: (lon,lat)}"""
+    d = {}
+    for a, b in pairs:
+        lon1, lat1 = points[a]
+        lon2, lat2 = points[b]
+        d[f"{a} -> {b}"] = factor * haversine_o(lon1, lat1, lon2, lat2)
+    return d
+
+def add_links_elec_routing_new_H2_pipelines():
+        attrs = ["bus0", "bus1", "length"]
+        h2_links = pd.DataFrame(columns=attrs)
+
+        candidates = pd.concat(
+            {
+                "lines": n_eur.lines[attrs],
+                "links": n_eur.links.loc[n_eur.links.carrier == "DC", attrs],
+            }
+        )
+
+        my_buses = [("DZ5 0", "DZ0 3"), ("MR3 0", "MR2 0"),("DZ5 0", "DZ0 0"), ("MR2 0", "MR6 0")]  # optional: drittes Feld = Länge
+        points = {bus: (row.x, row.y) for bus, row in n_eur.buses.iterrows()}
+        dists = distances_for_pairs(my_buses, points, factor=1.25)
+
+        my_buses_with_length = []
+        for bus0, bus1 in my_buses:
+            key = f"{bus0} -> {bus1}"
+            length = dists[key]  # Länge aus deinem Dictionary holen
+            my_buses_with_length.append((bus0, bus1, length))
+
+        for b in my_buses_with_length:
+            # erlaubt (bus0, bus1) oder (bus0, bus1, length)
+            if len(b) == 2:
+                bus0, bus1 = b
+                length = 100.0  # setz hier deinen Default
+            else:
+                bus0, bus1, length = b
+
+            buses = [bus0, bus1]
+            buses.sort()
+            name = f"H2 pipeline {buses[0]} -> {buses[1]}"
+
+            if name not in h2_links.index:
+                h2_links.at[name, "bus0"] = buses[0]
+                h2_links.at[name, "bus1"] = buses[1]
+                h2_links.at[name, "length"] = length
+
+        
+
+        n_eur.madd(
+            "Link",
+            h2_links.index,
+            bus0=h2_links.bus0.values + " H2",
+            bus1=h2_links.bus1.values + " H2",
+            p_min_pu=-1,
+            p_nom_extendable=True,
+            length=h2_links["length"].astype(float).values,#h2_links.length.values,
+            capital_cost= 29.669828144872003 * h2_links["length"].astype(float).values,#h2_links.length.values
+            carrier="H2 pipeline",
+            lifetime= 50   #costs.at["H2 (g) pipeline", "lifetime"],
+        )
+
+add_links_elec_routing_new_H2_pipelines()
 
 
 # Suffix "_old" einfügen
