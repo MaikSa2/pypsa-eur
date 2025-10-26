@@ -164,7 +164,7 @@ for h2_bus in new_h2_buses:
     #meoh_bus = matching_bus1
     oil_bus = h2_bus.replace(" H2", " oil")
     co2_stored_bus = h2_bus.replace(" H2", " co2 stored")
-    heat_bus = h2_bus.replace(" H2", " heat")
+    heat_bus = h2_bus.replace(" H2", " urban central heat")
 
     # Link-Daten aus Template kopieren und anpassen
     data = template_link.copy()
