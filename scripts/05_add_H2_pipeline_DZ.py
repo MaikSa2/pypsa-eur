@@ -23,7 +23,7 @@ n.add("Link",
           efficiency=1.0,
           length=1443.403468068955, #berechnet mit costs.ipynb
           reversed = False, #0.0, evtl. kann ich so vermeiden dass beim SOlven dieser Fehler auftritt, mit "bool" und "float"
-          capital_cost = 49231.76026618799, #berechnet mit costs.ipynb
+          capital_cost = 49231.76026618799, #berechnet mit costs.ipynb # 5188.48527884358 #
           #capital_cost=costs.at["H2 (g) pipeline", "capital_cost"],
           p_nom_extendable=True,
           lifetime=50,
