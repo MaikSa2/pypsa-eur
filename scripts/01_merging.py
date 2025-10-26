@@ -135,11 +135,13 @@ lines_to_hide = (
 line_widths = pd.Series(5.0, index=n_eur.lines.index)
 line_widths[lines_to_hide] = 0.0
 
+"""
 n_eur.plot(
     bus_sizes=bus_sizes,
     line_widths=line_widths,
     link_widths=link_widths
 )
+"""
 
 def haversine_o(lon1, lat1, lon2, lat2):
     """
