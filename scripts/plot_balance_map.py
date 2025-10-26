@@ -36,6 +36,7 @@ if __name__ == "__main__":
             carrier="H2",
         )
 
+
     configure_logging(snakemake)
     set_scenario_config(snakemake)
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
@@ -174,6 +175,7 @@ if __name__ == "__main__":
         subplot_kw={"projection": crs},
         layout="constrained",
     )
+    
 
     n.plot(
         bus_sizes=bus_sizes * bus_size_factor,

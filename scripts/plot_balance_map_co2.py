@@ -93,8 +93,8 @@ if __name__ == "__main__":
 
 
     # set location of buses to EU if location is empty and set x and y coordinates to bus location
-    n.buses["x"] = n.buses.location.map(n.buses.x)
-    n.buses["y"] = n.buses.location.map(n.buses.y)
+    #n.buses["x"] = n.buses.location.map(n.buses.x)
+    #n.buses["y"] = n.buses.location.map(n.buses.y)
 
     # bus_sizes according to energy balance of bus carrier
     eb = n.statistics.energy_balance(bus_carrier=carrier, groupby=["bus", "carrier"])

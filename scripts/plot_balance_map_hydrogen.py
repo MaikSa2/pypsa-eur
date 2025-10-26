@@ -77,6 +77,7 @@ if __name__ == "__main__":
     config = config["balance_map"][carrier]
     conversion = config["unit_conversion"]
 
+
     if carrier not in n.buses.carrier.unique():
         raise ValueError(
             f"Carrier {carrier} is not in the network. Remove from configuration `plotting: balance_map: bus_carriers`."
