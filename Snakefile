@@ -105,10 +105,39 @@ rule all:
             run=config["run"]["name"],
             **config["scenario"],
         ),
-
+        expand(
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customh2.pdf",
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
+        expand(
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customco2.pdf",
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
+        expand(
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customheat.pdf",
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
+        expand(
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_custom_AC.pdf",
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
         expand(
             RESULTS
             + "maps/base_s_{clusters}_{opts}_{sector_opts}-shippinglh2_network_{planning_horizons}.pdf",
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
+        expand(
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_customnh3.pdf",
             run=config["run"]["name"],
             **config["scenario"],
         ),
