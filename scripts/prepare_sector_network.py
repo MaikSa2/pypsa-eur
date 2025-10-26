@@ -3616,6 +3616,23 @@ def add_methanol(
     ):
         return
 
+    if methanol_options["transport"]:
+        methanol_transport = create_network_topology(
+            n, "methanol transport ", bidirectional=True
+        )
+        n.add(
+            "Link",
+            methanol_transport.index,
+            bus0=methanol_transport.bus0 + " methanol",
+            bus1=methanol_transport.bus1 + " methanol",
+            p_nom_extendable=False,
+            p_nom=5e4,
+            length=methanol_transport.length,
+            marginal_cost=methanol_options["transport_cost"]
+            * methanol_transport.length,
+            carrier="methanol transport",
+        )
+
     logger.info("Add methanol")
     add_carrier_buses(
         n=n,
@@ -4851,7 +4868,7 @@ def add_industry(
                 efficiency4=costs.at["oil", "CO2 intensity"] * options["cc_fraction"],
                 lifetime=costs.at["waste CHP CC", "lifetime"],
             )
-
+    '''
     # TODO simplify bus expression
     n.add(
         "Load",
@@ -4868,7 +4885,7 @@ def add_industry(
         carrier="low-temperature heat for industry",
         p_set=industrial_demand.loc[nodes, "low-temperature heat"] / nhours,
     )
-
+    '''
     # remove today's industrial electricity demand by scaling down total electricity demand
     for ct in n.buses.country.dropna().unique():
         # TODO map onto n.bus.country
