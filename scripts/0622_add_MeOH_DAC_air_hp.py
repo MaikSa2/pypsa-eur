@@ -13,7 +13,7 @@ n_copy = pypsa.Network(eur_file)
 
 #Methanol Busse
 # Ziel-Busse für neue Methanoliliserungs-Links
-new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2", "MA0 0 H2", "MA0 1 H2", "MR6 0 H2", "TN0 0 H2"]
+new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2","DZ0 0 H2", "DZ0 1 H2","DZ0 3 H2", "DZ0 4 H2","DZ1 0 H2", "DZ5 0 H2", "MA0 0 H2", "MA0 1 H2","MA0 2 H2", "MA4 0 H2", "MR6 0 H2", "MR2 0 H2","MR3 0 H2", "TN0 0 H2"]
 
 for h2_bus in new_h2_buses:
     # Namen für den neuen methanol-Bus generieren
@@ -66,7 +66,7 @@ for h2_bus in new_h2_buses:
 
 #Urban central heat Busse
 # Ziel-Busse für neue Urban Central heat Busse
-new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2", "MA0 0 H2", "MA0 1 H2", "MR6 0 H2", "TN0 0 H2"]
+#new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2", "MA0 0 H2", "MA0 1 H2", "MR6 0 H2", "TN0 0 H2"]
 
 ### Heat Busse hinzufügen
 for h2_bus in new_h2_buses:
@@ -266,7 +266,8 @@ for h2_bus in new_h2_buses:
 print("Neue Links in links_t hinzugefügt.")
 
 # Ausgangsliste (ohne Suffix in cop_pd)
-new_buses = ["DZ0 2", "DZ0 5", "MA0 0", "MA0 1", "MR6 0", "TN0 0"]
+#new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2","DZ0 0 H2", "DZ0 1 H2","DZ0 3 H2", "DZ0 4 H2","DZ1 0 H2", "DZ5 0 H2", "MA0 0 H2", "MA0 1 H2","MA0 2 H2", "MA4 0 H2", "MR6 0 H2", "MR2 0 H2","MR3 0 H2", "TN0 0 H2"]
+new_buses =    ["DZ0 2", "DZ0 5", "DZ0 0", "DZ0 1","DZ0 3", "DZ0 4", "DZ1 0", "DZ5 0", "MA0 0", "MA0 1", "MA0 2", "MA4 0", "MR6 0", "MR2 0", "MR3 0", "TN0 0"]
 suffix = "urban central air heat pump"
 
 # Mapping: Spaltenname in cop_pd  ->  Spaltenname in n.links_t.efficiency
