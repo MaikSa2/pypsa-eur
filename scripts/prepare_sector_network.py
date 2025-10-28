@@ -3618,14 +3618,14 @@ def add_methanol(
 
     if methanol_options["transport"]:
         methanol_transport = create_network_topology(
-            n, "methanol transport ", bidirectional=True
+            n, "methanol transport ", bidirectional=False
         )
         n.add(
             "Link",
             methanol_transport.index,
             bus0=methanol_transport.bus0 + " methanol",
             bus1=methanol_transport.bus1 + " methanol",
-            p_nom_extendable=False,
+            p_nom_extendable=True,
             p_nom=5e4,
             length=methanol_transport.length,
             marginal_cost=methanol_options["transport_cost"]
