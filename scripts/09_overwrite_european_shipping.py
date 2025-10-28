@@ -152,6 +152,9 @@ methanol_transport = methanol_transport.drop(index="methanol transport  -> ", er
 methanol_transport = methanol_transport.drop(index="methanol transport MA0 1 -> ES0 0", errors="ignore")
 methanol_transport = methanol_transport.drop(index="methanol transport TN0 0 -> IT0 0", errors="ignore")
 methanol_transport = methanol_transport.drop(index="methanol transport ES0 0 -> DZ0 5", errors="ignore")
+methanol_transport = methanol_transport.drop(index="methanol transport ES0 0 -> MA0 1", errors="ignore")
+methanol_transport = methanol_transport.drop(index="methanol transport IT0 0 -> TN0 0", errors="ignore")
+methanol_transport = methanol_transport.drop(index="methanol transport DZ0 5 -> ES0 0", errors="ignore")
 
 n.add(
             "Link",
