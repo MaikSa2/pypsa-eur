@@ -1399,6 +1399,11 @@ if __name__ == "__main__":
         limit_max_growth=snakemake.params.get("sector", {}).get("limit_max_growth"),
     )
 
+    if "reversed" in n.links.columns:
+        n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool)
+    else:
+        n.links["reversed"] = False
+
     logging_frequency = snakemake.config.get("solving", {}).get(
         "mem_logging_frequency", 30
     )
