@@ -141,6 +141,12 @@ rule all:
             run=config["run"]["name"],
             **config["scenario"],
         ),
+        expand(
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_custom_meoh.pdf",
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
 
         lambda w: expand(
             (
