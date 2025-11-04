@@ -18,7 +18,10 @@ n_copy = pypsa.Network(eur_file)
 
 #Ammoniak Busse
 # Ziel-Busse für neue Ammoniak-Links
-new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2", "MA0 0 H2", "MA0 1 H2", "MR6 0 H2", "TN0 0 H2"]
+#new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2", "MA0 0 H2", "MA0 1 H2", "MR6 0 H2", "TN0 0 H2"]
+new_h2_buses = ["DZ0 2 H2", "DZ0 5 H2","DZ0 0 H2", "DZ0 1 H2","DZ0 3 H2", "DZ0 4 H2",#"DZ1 0 H2", 
+                "DZ5 0 H2", "MA0 0 H2", "MA0 1 H2","MA0 2 H2", #"MA4 0 H2", 
+                "MR6 0 H2", "MR2 0 H2","MR3 0 H2", "TN0 0 H2"]
 
 for h2_bus in new_h2_buses:
     # Namen für den neuen Ammonia-Bus generieren
