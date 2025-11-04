@@ -109,6 +109,29 @@ for link in links_to_remove:
     if link in n_eur.links.index:
         n_eur.remove("Link", link)
 
+n_eur.generators.loc["MR6 0 solar", "p_nom_max"] = 5000 #900 #60000
+n_eur.generators.loc["MR6 0 onwind", "p_nom_max"] = 5000 #1500 #96000
+n_eur.generators.loc["MR2 0 solar", "p_nom_max"] = 10000  #10000
+n_eur.generators.loc["MR2 0 onwind", "p_nom_max"] = 5000
+n_eur.generators.loc["MR3 0 solar", "p_nom_max"] = 13000 #15000
+n_eur.generators.loc["MR3 0 onwind", "p_nom_max"] = 5000
+n_eur.generators.loc["MR6 0 offwind-dc", "p_nom_max"] = 50
+"""
+n_eur.generators.loc["MR6 0 solar", "p_nom"] = 60000 # 6000 #900 #60000
+n_eur.generators.loc["MR6 0 onwind", "p_nom"] = 96000 # 9600 #1500 #96000
+n_eur.generators.loc["MR2 0 solar", "p_nom"] = 10000 # 1000  #10000
+n_eur.generators.loc["MR2 0 onwind", "p_nom"] = 5000 #1500
+n_eur.generators.loc["MR3 0 solar", "p_nom"] = 15000 #1000 #15000
+n_eur.generators.loc["MR3 0 onwind", "p_nom"] = 5000 #1500
+n_eur.generators.loc["MR6 0 offwind-dc", "p_nom"] = 50
+n_eur.generators.loc["MR6 0 solar", "p_nom_extendable"] = False #900 #60000
+n_eur.generators.loc["MR6 0 onwind", "p_nom_extendable"] = False #1500 #96000
+n_eur.generators.loc["MR2 0 solar", "p_nom_extendable"] = False  #10000
+n_eur.generators.loc["MR2 0 onwind", "p_nom_extendable"] = False
+n_eur.generators.loc["MR3 0 solar", "p_nom_extendable"] = False #15000
+n_eur.generators.loc["MR3 0 onwind", "p_nom_extendable"] = False
+n_eur.generators.loc["MR6 0 offwind-dc", "p_nom_extendable"] = False
+"""
 n_eur_copy = pypsa.Network(eur_file)
 
 print(n_alg.component)
