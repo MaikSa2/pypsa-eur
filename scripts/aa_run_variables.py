@@ -2,7 +2,7 @@ import yaml
 from pathlib import Path
 
 # Config laden
-with open(r"/home/student_01/Student_Folders/Maik/pypsa-eur/config/config_a5.yaml") as f:  # Pfad anpassen
+with open(r"/home/student_01/Student_Folders/Maik/pypsa-eur/config/config_a8.yaml") as f:  # Pfad anpassen
     config = yaml.safe_load(f)
 
 prefix = config["run"]["prefix"]
