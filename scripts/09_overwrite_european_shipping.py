@@ -334,7 +334,43 @@ for link_name in new_cost_links_ammonia:
         print(f"✅ {link_name}: marginal_cost = {value:.4f} €/MWh")
     else:
         print(f"❌ Link nicht im Netzwerk gefunden: {link_name}")
+"""
+# Bedingungen definieren
+keywords = ["DZ", "MA", "TN", "MR"]
 
+mask = n.links.index.to_series().apply(
+    lambda x: "ammonia transport" in x and any(k in x for k in keywords)
+)
+
+# Gefundene Links auflisten (zur Kontrolle)
+print("Zu entfernende Links:")
+print(n.links.index[mask])
+
+# Entfernen
+n.mremove("Link", n.links.index[mask])
+
+mask = n.links.index.to_series().apply(
+    lambda x: "oil transport" in x and any(k in x for k in keywords)
+)
+
+# Gefundene Links auflisten (zur Kontrolle)
+print("Zu entfernende Links:")
+print(n.links.index[mask])
+
+# Entfernen
+n.mremove("Link", n.links.index[mask])
+
+mask = n.links.index.to_series().apply(
+    lambda x: "methanol transport" in x and any(k in x for k in keywords)
+)
+
+# Gefundene Links auflisten (zur Kontrolle)
+print("Zu entfernende Links:")
+print(n.links.index[mask])
+
+# Entfernen
+n.mremove("Link", n.links.index[mask])
+"""
 # Suffix "_old" einfügen
 base, ext = os.path.splitext(eur_file)
 eur_file_old = base + "_pre09" + ext
