@@ -80,7 +80,7 @@ def plot_map(
             if col in df_c.columns:
                 df_c.loc[df_c[col].str.contains("DZ", na=False), "location"] = "DZ0 0"
                 df_c.loc[df_c[col].str.contains("MA", na=False), "location"] = "MA0 0"
-                df_c.loc[df_c[col].str.contains("MR", na=False), "location"] = "MR0 0"
+                df_c.loc[df_c[col].str.contains("MR", na=False), "location"] = "MR6 0"
                 df_c.loc[df_c[col].str.contains("TN", na=False), "location"] = "TN0 0"
 
         attr = "e_nom_opt" if comp == "stores" else "p_nom_opt"
