@@ -294,6 +294,60 @@ if config["foresight"] != "perfect":
         script:
             "../scripts/plot_balance_map_ammonia.py"
 
+    rule plot_custom_meoh_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_custom_meoh.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_custom_meoh.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_custom_meoh"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_methanol.py"
+
+    rule plot_custom_oil_map:
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            regions=resources("regions_onshore_base_s_36.geojson"),
+            #regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/custom_base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}-balance_map_custom_oil.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_custom_oil.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_custom_oil"
+            )
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/plot_balance_map_oil.py"
+
     rule plot_customco2_map:
         params:
             plotting=config_provider("plotting"),
