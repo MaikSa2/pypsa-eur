@@ -50,37 +50,6 @@ if __name__ == "__main__":
             carrier="H2",
         )
 
-    """
-     Mock config:
-         oil:
-      unit: TWh
-      unit_conversion: 1_000_000
-      cmap: Greys
-      vmin:
-      vmax:
-      region_unit: €/MWh
-      bus_factor: 0.002
-      branch_factor: 0.01
-      flow_factor: 100
-      bus_sizes:
-      - 200
-      - 100
-      branch_sizes:
-      """
-    
-    unit_conversion = 1_000_000
-    bus_factor =  0.1 #0.002
-    branch_factor = 0.01
-    flow_factor = 100
-    vmin = None
-    vmax = None
-    region_unit= "€/MWh"
-    branch_sizes = None
-    unit ="TWh"
-    cmap = "Greys"
-
-
-
     configure_logging(snakemake)
     set_scenario_config(snakemake)
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
@@ -92,11 +61,8 @@ if __name__ == "__main__":
     #regions = gpd.read_file(snakemake.input.regions).set_index("name")
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
     config = snakemake.params.plotting
-    carrier = "NH3"    #snakemake.wildcards.carrier
+    carrier = "oil" # "H2"    #snakemake.wildcards.carrier
     print("carrier:", carrier)
-    print("DEBUG carrier:", carrier)
-    print("DEBUG available balance_map keys:", list(config.get("balance_map", {}).keys()))
-    print("DEBUG snakemake configfiles:", getattr(snakemake, "configfiles", "n/a"))
     # fill empty colors or "" with light grey
     mask = n.carriers.color.isna() | n.carriers.color.eq("")
     n.carriers["color"] = n.carriers.color.mask(mask, "lightgrey")
@@ -108,8 +74,9 @@ if __name__ == "__main__":
     # get balance map plotting parameters
     #boundaries = config["map"]["boundaries"]
     boundaries = [-30, 18, 10, 71]
-    config = "NH3" # config["balance_map"][carrier]
-    conversion = unit_conversion # config["unit_conversion"]
+    config = config["balance_map"][carrier]
+    conversion = config["unit_conversion"]
+
 
     if carrier not in n.buses.carrier.unique():
         raise ValueError(
@@ -129,6 +96,7 @@ if __name__ == "__main__":
     # set location of buses to EU if location is empty and set x and y coordinates to bus location
     n.buses["x"] = n.buses.location.map(n.buses.x)
     n.buses["y"] = n.buses.location.map(n.buses.y)
+    #n.buses = n.buses.drop
 
     # bus_sizes according to energy balance of bus carrier
     eb = n.statistics.energy_balance(bus_carrier=carrier, groupby=["bus", "carrier"])
@@ -175,6 +143,7 @@ if __name__ == "__main__":
 
    #print("flow in plot_balance_map just reduced:", flow)
 
+
     # Zurück auf Standard
     pd.reset_option("display.max_rows")
     pd.reset_option("display.max_columns")
@@ -184,15 +153,17 @@ if __name__ == "__main__":
     fallback = pd.Series()
     line_widths = flow.get("Line", fallback).abs()
     link_widths = flow.get("Link", fallback).abs()
-    link_widths[n.links.p_nom_opt < 100 ] = 0.0
+    link_widths[n.links.p_nom_opt < 1 ] = 0.0 #100
+
 
     # define maximal size of buses and branch width
-    bus_size_factor = bus_factor # config["bus_factor"]
-    branch_width_factor = branch_factor #config["branch_factor"]
-    flow_size_factor = flow_factor # config["flow_factor"]
+    bus_size_factor = config["bus_factor"] #0.2 #
+    branch_width_factor = config["branch_factor"]
+    flow_size_factor = config["flow_factor"]
 
     # get prices per region as colormap
     buses = n.buses.query("carrier in @carrier").index
+    #buses = buses.drop(["DZ1 0 methanol", "MA4 0 methanol"])
     weights = n.snapshot_weightings.generators
     prices = weights @ n.buses_t.marginal_price[buses] / weights.sum()
     price = prices.rename(n.buses.location).groupby(level="Bus").mean()
@@ -210,12 +181,10 @@ if __name__ == "__main__":
         shift = 0
 
     vmin, vmax = regions.price.min() - shift, regions.price.max() + shift
-    """
     if config["vmin"] is not None:
         vmin = config["vmin"]
     if config["vmax"] is not None:
         vmax = config["vmax"]
-        """
 
     crs = load_projection(snakemake.params.plotting)
 
@@ -270,6 +239,14 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.EqualEarth()})
 
+    # Paths überschreiben
+    #print("Paths davor:",  paths)
+    paths = {
+        k.replace("shipping-lh2", "shipping-oil").replace("H2", "oil"): v
+        for k, v in paths.items()
+        }
+    #print("Paths danach:",  paths)
+
     # Vorher projizieren:
     proj_paths = project_paths(ax, paths)
 
@@ -292,7 +269,7 @@ if __name__ == "__main__":
     regions.to_crs(crs.proj4_init).plot(
         ax=ax,
         column="price",
-        cmap=cmap, #cmap = config["cmap"],
+        cmap=config["cmap"],
         vmin=vmin,
         vmax=vmax,
         edgecolor="None",
@@ -300,11 +277,11 @@ if __name__ == "__main__":
     )
 
     ax.set_title(carrier)
-
+    
     # Add colorbar
     norm = plt.Normalize(vmin=vmin, vmax=vmax)
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm) #cmap = config["cmap"]
-    price_unit = region_unit #config["region_unit"]
+    sm = plt.cm.ScalarMappable(cmap=config["cmap"], norm=norm)
+    price_unit = config["region_unit"]
     cbr = fig.colorbar(
         sm,
         ax=ax,
@@ -316,7 +293,6 @@ if __name__ == "__main__":
     )
     cbr.outline.set_edgecolor("None")
 
-    
     # add legend
     legend_kwargs = {
         "loc": "upper left",
@@ -324,7 +300,6 @@ if __name__ == "__main__":
         "alignment": "left",
         "title_fontproperties": {"weight": "bold"},
     }
-    
 
     pad = 0.18
     n.carriers.loc["", "color"] = "None"
@@ -349,7 +324,6 @@ if __name__ == "__main__":
         },
     )
 
-    
     # Add consumption carriers
     add_legend_patches(
         ax,
@@ -362,12 +336,10 @@ if __name__ == "__main__":
             **legend_kwargs,
         },
     )
-    
 
-    
     # Add bus legend
-    legend_bus_sizes = [200, 100] #bus_sizes #config["bus_sizes"]
-    carrier_unit = unit #config["unit"]
+    legend_bus_sizes = config["bus_sizes"]
+    carrier_unit = config["unit"]
     if legend_bus_sizes is not None:
         add_legend_semicircles(
             ax,
@@ -382,10 +354,9 @@ if __name__ == "__main__":
                 **legend_kwargs,
             },
         )
-    
 
     # Add branch legend
-    legend_branch_sizes =  branch_sizes #config["branch_sizes"]
+    legend_branch_sizes = config["branch_sizes"]
     if legend_branch_sizes is not None:
         add_legend_lines(
             ax,

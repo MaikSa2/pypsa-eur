@@ -235,6 +235,9 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.EqualEarth()})
 
+    # Paths überschreiben
+
+
     # Vorher projizieren:
     proj_paths = project_paths(ax, paths)
 
